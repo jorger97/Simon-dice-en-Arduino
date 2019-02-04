@@ -1,0 +1,125 @@
+const int pinDeBoton1 = 7;
+const int pinDeBoton2 = 4;
+const int pinDeBoton3 = 2;
+
+const int pinDeLed1 = 12;
+const int pinDeLed2 = 11;
+const int pinDeLed3 = 10;
+
+int estadoDeBoton1 = 0;
+int estadoDeBoton2 = 0;
+int estadoDeBoton3 = 0;
+
+int nivel = 1;
+bool jugando = false;
+String serieDeBotones = ""; //Guardar el patron de botones presionados
+String serieDeLeds = ""; //Guardar el patron de LEDs encendidas
+int numeroRandom; // Guardar numero generado al azar
+
+
+void setup() {
+  pinMode(pinDeLed1, OUTPUT);
+  pinMode(pinDeLed2, OUTPUT);
+  pinMode(pinDeLed3, OUTPUT);
+
+  pinMode(pinDeBoton1, INPUT);
+  pinMode(pinDeBoton2, INPUT);
+  pinMode(pinDeBoton3, INPUT);
+}
+
+void loop() {
+  //Leer si alguno de los botones es presionado
+  estadoDeBoton1 = digitalRead(pinDeBoton1);
+  estadoDeBoton2 = digitalRead(pinDeBoton2);
+  estadoDeBoton3 = digitalRead(pinDeBoton3);
+
+  //checar si algun boton es presionado y empezar juego en caso de
+  if (estadoDeBoton1 == HIGH || estadoDeBoton2 == HIGH || estadoDeBoton3 == HIGH && nivel == 1){
+    jugando = true; //comenzar juego
+  }
+
+
+  if (jugando == true){
+    //generar numero random y encender led por cada nivel
+    if (serieDeLeds.length() < nivel){ //entrar solo si el nivel es mayor al numero de leds que se han encendido
+      delay(500);
+      randomSeed(analogRead(A0)); //asegurar que nuestro numero sea lo mas random
+      numeroRandom = random(1, 4); //numero random entre 1 y 3
+      serieDeLeds += numeroRandom; //Agregar numero generado en patron de LEDs
+
+      //Leer cada character en serieDeLeds y encender LED correspondiente
+      for (int i=0; i < serieDeLeds.length(); i++ ){
+        if (serieDeLeds[i] == '1') {
+          digitalWrite(pinDeLed1, HIGH);
+          delay(250);
+          digitalWrite(pinDeLed1, LOW);
+          delay(250);
+        }
+        if (serieDeLeds[i] == '2') {
+          digitalWrite(pinDeLed2, HIGH);
+          delay(250);
+          digitalWrite(pinDeLed2, LOW);
+          delay(250);
+        }
+        if (serieDeLeds[i] == '3') {
+          digitalWrite(pinDeLed3, HIGH);
+          delay(250);
+          digitalWrite(pinDeLed3, LOW);
+          delay(250);
+        }
+      }
+      
+    }
+
+    estadoDeBoton1 = digitalRead(pinDeBoton1);
+    estadoDeBoton2 = digitalRead(pinDeBoton2); //Actualizar lectura de botones
+    estadoDeBoton3 = digitalRead(pinDeBoton3);
+
+   // En caso de boton presionado agregar al patron de botones
+   if (estadoDeBoton1 == HIGH){
+    digitalWrite(pinDeLed1, HIGH); //Encender LED seleccionado
+    delay(250);
+    digitalWrite(pinDeLed1, LOW);
+    serieDeBotones += "1"; //Agregar seleccion a serieDeBotones
+    
+   }
+   if (estadoDeBoton2 == HIGH){
+    digitalWrite(pinDeLed2, HIGH);
+    delay(250);
+    digitalWrite(pinDeLed2, LOW);
+    serieDeBotones += "2";
+   }
+   if (estadoDeBoton3 == HIGH){
+    digitalWrite(pinDeLed3, HIGH);
+    delay(250);
+    digitalWrite(pinDeLed3, LOW);
+    serieDeBotones += "3";
+   }
+
+   //Checar si el nivel se gano
+   if (serieDeBotones.length() >= nivel && serieDeBotones.length() == serieDeLeds.length()){
+    if (serieDeBotones == serieDeLeds){
+      nivel++; //subir nivel
+      serieDeBotones = ""; //reiniciar serieDeBotones
+    } else {
+      //Reiniciar todas las variables de juego
+      nivel = 1;
+      jugando = false;
+      serieDeBotones = "";
+      serieDeLeds = "";
+      delay(800);
+    }
+   }
+   
+  } else if (estadoDeBoton1 == LOW || estadoDeBoton2 == LOW || estadoDeBoton3 == LOW){
+    //Parpadear LEDs cuando jugando sea false
+    digitalWrite(pinDeLed1, HIGH);
+    digitalWrite(pinDeLed2, HIGH);
+    digitalWrite(pinDeLed3, HIGH);
+    delay(100);
+    digitalWrite(pinDeLed1, LOW);
+    digitalWrite(pinDeLed2, LOW);
+    digitalWrite(pinDeLed3, LOW);
+    delay(100);
+  }
+}
